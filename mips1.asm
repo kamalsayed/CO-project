@@ -28,9 +28,10 @@ main :
 	li $v0 , 4 #to print string
 	la $a0 , Ex #the string is "exist "
 	syscall
-	beqz $s2 Zero # to get the index we need to divide by for indexes from 1 to the end and if zero don't need to do that
+	beqz $s2 Zero # to get the index we need to divide by four, indexes from 1 to the end and if zero don't need to do that
 	div $s2 , $s2 , 4 #div ndex by four
-      Zero :	li $v0,1  # hereto print the number
+        Zero :	
+	li $v0,1  # hereto print the number
    	move $a0 , $s2
 	syscall
 	j EXIT # EO program
