@@ -80,6 +80,11 @@ Sort:
 	syscall
 	li $v0,5 # to read the choice 
 	syscall
+	move $t2 , $v0
+	bne $t2 , 1 , Ascending
+	jal  Descending
+ 
+Descending:
 	li $s0 ,0 #i counetr a0
 	
 	li $s1 ,0 #j counter a1
@@ -87,31 +92,24 @@ Sort:
 	li $s2, 0 #temp a2
 	
 	li $t0 ,15 #load size to subtract i from it
-	move $t2 , $v0
-	bne $t2 , 1 , Ascending
-	b  Descending
-	
-
-   
-   
-Descending:
-
-	
-
 outer2:
+	
         ble  $s0, 14 , inner2 # [0 -- > 14]
-        j return1
+        j return2
   
    inner2 :
    	sll $t6,$s1,2 # index[j]=j*4	
    	add $t4 ,$v1 ,$t6 #get effective adress
    	lw $t1 ,0($t4)
    	lw $t2 ,4($t4)
-   	slt $t9 , $t2 , $t1
-   	beq $t9 , 1 ,inner2_else #a[j] < a[j+1] Don't work
-   	#swap if  a[j] < a[j+1] if t9 =0
-   	sw $t1 ,4($t4)
-   	sw $t2 ,0($t4)
+   	slt $t9 , $t1 , $t2
+   	beq $t9 , 1 ,inner2_else #a[j] < a[j+1]
+   	#swap if  a[j] > a[j+1] if t9 =0
+   	add $t8 , $t1 ,$0
+   	add $t1 , $t2 ,$0
+   	add $t2 , $t8 ,$0
+   	sw $t1 ,0($t4)
+   	sw $t2 ,4($t4)
    	inner2_else: # to incr and back to inner loop
    	addi $s1 , $s1 , 1
    	sub $t8,$t0,$s0
@@ -121,11 +119,41 @@ outer2:
    		li $s1 ,0
    		jal outer2
    		
-   		Ascending :#note array in s0 reg
-  	
+   return2:
+   	   li $t0 , 14
+   	   li $t3 , 0
+   	   div  $s5 , $t0 , 2
+   FOR2:
+        
+   	bge  $t0 , $s5, L2
+   	j return1
+   L2:	sll $t6 , $t0 ,2 #index *4
+   	add $s3 ,$v1 ,$t6
+   	sll $t7 , $t3 ,2 #index *4
+   	add $s4 ,$v1 ,$t7
+   	lw $s1 , 0($s3)
+   	lw $s2,0($s4)
+   	sw $s1 , 0($s4)
+   	sw $s2 , 0($s3)
+   	addi $t0 , $t0,-1 
+   	addi $t3 , $t3 , 1
+   	j  FOR2
+   END_FOR2:		
 	
-
+	
+	
+	
+   		
+Ascending :#note array in s0 reg
+  	li $s0 ,0 #i counetr a0
+	
+	li $s1 ,0 #j counter a1
+	
+	li $s2, 0 #temp a2
+	
+	li $t0 ,15 #load size to subtract i from it
 outer1:
+	
         ble  $s0, 14 , inner1 # [0 -- > 14]
         j return1
   
@@ -167,10 +195,17 @@ outer1:
    	syscall 
    	addi $t0 , $t0,1 
    	j  FOR
-   END_FOR:		
+   END_FOR:	
+   
+   	
+   	
+   			
+   				
+   						
   
 	
 EndSort:
 
 
 EXIT:
+
