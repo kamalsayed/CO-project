@@ -2,22 +2,48 @@
  Ex  : .asciiz "Exist in index : "
  Exnt: .asciiz "not Exist\n"
 tab : .asciiz "		"
-list: .word 5,7,8,2,9,1,4,15,3,10,11,12,13,14,6
+list: .word 
+Values : .asciiz "\nEnter your array Values *Fixed 15*\n"
 Type : .asciiz  "for search Enter 1 , for sort enter 0\n"
 Sear_val : .asciiz "Enter the Value you are searching for\n"
 sort_t : .asciiz "for ascending sort enter 0 for descending sort enter 1\n"
+mas : .asciiz "choise is not valid\n" 
 .text 
 .globl main
 main :
-	
-	li $v0 , 4 #to print string
+
+  	
+  	li $v0 , 4 #to print string
 	la $a0 , Type #the string
 	syscall
 	li $v0,5 # to read the choice 
 	syscall
 	move $t0,$v0 # to store the choice into t0 reg
 	la $a0 , list #first address of list 
+	bgt $t0,1,notvalid  #notify if entered value greater than 1
+	blt $t0,0,notvalid #notify if entered value less than 0
 	move $v1 , $a0 # to copy array address
+	#Here we get the values of the array
+	li $t1 ,0# i counter
+	li $v0 , 4
+        la $a0 , Values # to print msg to get values
+	syscall
+	For_1:
+	beq  $t1 , 15  End_1 # size of array is fixed 15 value
+	sll $t2 , $t1 ,2 # i*4
+	add $t2 , $t2, $v1  # i*4 + start address 
+	li $v0 ,5 #get input
+	syscall
+	add $t3, $v0 ,$0 # to store the word into t3
+	sw $t3 , 0($t2) # store the word in the dependence index in memory
+	addi $t1 ,$t1 ,1 # i++
+	j For_1 # loop
+        End_1:
+	
+	
+	
+	
+	
 	bne  $t0 ,1 Sort #if choice is 1 goto sort else goto search and link to get return
 	jal Search # jump to search function
 	add $s1 , $v1, $0 # the returned values from search v1 is flag if exist = 1 else = 0
@@ -82,15 +108,12 @@ Sort:
 	li $v0,5 # to read the choice 
 	syscall
 	move $t2 , $v0 # to store type of sort in t2
-	
 	li $s0 ,0 #i counetr =0 in a0 
-	
 	li $s1 ,0 #j counter =0 in a1
-	
 	li $s2, 0 #temp =0 in a2
-	
 	li $t0 ,15 #load size to subtract i counter in inner loop from it
-	
+	bgt $t2,1,notvalids #notify if entered value greater than 1
+	blt $t2,0,notvalids#notify if entered value less than 0
 	bne $t2 , 1 , Ascending# if type of  search = 0 goto ascending
 	jal  Descending # else goto Descending
  	
@@ -184,4 +207,15 @@ outer2: #outer loop
    	j  FOR
    END_FOR:		
 EndSort:
+notvalid:# if choise is unvalid
+	li $v0 , 4 #to print string
+	la $a0 , mas #the string
+	syscall
+	j main #restart main the program
+	
+notvalids:# if choise is unvalid
+	li $v0 , 4 #to print string
+	la $a0 , mas #the string
+	syscall
+	j Sort #restart sort the program	
 EXIT:
